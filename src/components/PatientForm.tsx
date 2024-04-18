@@ -2,15 +2,32 @@ import { useForm } from 'react-hook-form';
 import Error from './Error';
 import { DraftPatient } from '../types';
 import { usePatientStore } from '../store/store';
+import { useEffect } from 'react';
 
 function PatientForm() {
-  const { addPatient } = usePatientStore();
-  const { register, handleSubmit, formState: { errors }, reset } = useForm<DraftPatient>();
+  const { addPatient, activeId, patients, updatePatient } = usePatientStore();
+  const { register, handleSubmit, formState: { errors }, reset, setValue } = useForm<DraftPatient>();
 
   const registerPatient = (data : DraftPatient) => {
-    addPatient(data);
+    if(activeId) {
+      updatePatient(data);
+    } else {
+      addPatient(data);
+    }
+    
     reset();
   }
+
+  useEffect(() => {
+    if(activeId) {
+      const activePatient = patients.filter(patient => patient.id === activeId)[0];
+      setValue('name', activePatient.name);
+      setValue('caretaker', activePatient.caretaker);
+      setValue('email', activePatient.email);
+      setValue('date', activePatient.date);
+      setValue('symptoms', activePatient.symptoms);
+    }
+  }, [activeId, patients]);
 
   return (
     <div className="md:w-1/2 lg:w-2/5 mx-5">
